@@ -38,10 +38,12 @@ module East
     def async_count_file_size(dir)
       Dir.chdir(dir) do
         Dir['*.sql'].each do |f|
+          f = Pathname.new(dir).join(f).to_s
           Resque.enqueue(Table, f)
         end
       end
     end
+
     def init_tables
       tables = []
       ::CSV.foreach('config/tables.csv', headers: true) do |row|
