@@ -7,9 +7,12 @@ require 'resque'
 require 'csv'
 
 module East
+
+
   class Bank
-    $config = YAML.load_file('config/east.yaml')
-    attr_reader :schema, :license, :logger
+    $config = YAML.load_file(ROOT_DIR.join('config/east.yaml'))
+    attr_reader :name, :schema, :license, :tables
+
 
     def initialize(name)
       bank = $config[name]
@@ -19,37 +22,23 @@ module East
       @license = bank[:license]
       @name = name
 
-      @tables ||= init_tables
-      @logger ||= Logger.new("log/east_#{schema}.log")
+      @tables = ::CSV.read(ROOT_DIR.join('config/tables.csv', headers: true)).inject([]) do |ts, r|
+        ts << Table.new(self, r)
+      end
+
     end
 
-    def async_load_data(dir, gather_date)
+    def async_load_data(dir, gather_date, append = false)
       tables.each do |table|
-        basename = "#{@license}-#{table.fname}-#{gather_date}.txt"
-        data_file = Pathname.new(dir).join(basename)
-        if File.exists(data_file)
-          Resque.enqueue(Table, @name, table.code, data_file)
+        fname = table.fname(dir, gather_date)
+        if File.exists(fname)
+          command = table.to_load_command(fname, append)
+          Resque.enqueue(LoadDataTask, name, table.code, command)
         else
-          @logger.info "File #{data_file.to_s} not exist"
+          $stdout.puts "File #{data_file.to_s} not exist"
         end
       end
     end
 
-    def async_count_file_size(dir)
-      Dir.chdir(dir) do
-        Dir['*.sql'].each do |f|
-          f = Pathname.new(dir).join(f).to_s
-          Resque.enqueue(Table, f)
-        end
-      end
-    end
-
-    def init_tables
-      tables = []
-      ::CSV.foreach('config/tables.csv', headers: true) do |row|
-        tables << Table.new(self, row)
-      end
-      tables
-    end
   end
 end

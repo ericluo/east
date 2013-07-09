@@ -1,11 +1,9 @@
 # encoding: utf-8
 
-require 'open3'
-require 'logger'
-
 module East
   class Table
-    @queue = :file_size_count
+    attr_accessor :category, :code, :cname, :ename, :iname
+    attr_reader   :bank
 
     def initialize(bank, record)
       @bank     = bank
@@ -13,59 +11,28 @@ module East
       @code     = record['表号']
       @cname    = record['表中文名']
       @ename    = record['表英文名']
-      @fname    = record['接口文件名']
+      @iname    = record['接口文件名']
     end
 
-    def logger
-      @bank.logger
+    def find(bank, code)
+      bank.tables.select{|table| table.code == code}
     end
 
-    def self.perform(file)
-      puts "File #{file} size: #{File.size(file)}"
+    def fname(dir, gather_date)
+      basename = "#{bank.license}-#{iname}-#{gather_date}.txt"
+      Pathname.new(dir).join(basename)
     end
 
-    # def self.perform(bank_name, table_code, file)
-    #   bank = Bank.new(bank_name)
-    #   table = bank.tables.select{|t| t.code == table_code }
-    #   table.load_file(file)
-    # end
+    def schema
+      bank.schema
+    end
 
-    def load_file(file)
-      # prepare
-      
-      logger.info "LOADING: #{file}"
-      $stdout.puts "LOADING: #{command}"
-
-      exit_status = run(command)
-      if exit_status.success?
-        logger.info "Loaded successfully"
+    def to_load_command(fname, append)
+      if append
+        "db2 load from #{fname} of del insert into #{schema}.#{ename}"
       else
-        logger.warn "Loaded with warning or error: #{exit_status.inspect}"
+        "db2 load from #{fname} of del replace into #{schema}.#{ename}"
       end
-    end
-
-    def command
-      "echo 'hello'"
-      # "db2 load from #{file} of del replace into #{@bank.schema}.#{@tname}"
-    end
-
-    def run(cmd)
-      Open3.popen2e(cmd) do |stdin, stdout_err, wait_thr|
-	stdin.close
-
-	while line = stdout_err.gets
-	  $stdout.puts line
-	  line = line.chomp
-	  logger.info(line) if /行数/ =~ line
-	end
-
-	return wait_thr.value
-      end
-    end
-
-    def prepare
-      system("db2 connect to EASTST")
-      system("db2 set current schema='#{@schema}'")
     end
 
   end
