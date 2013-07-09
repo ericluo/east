@@ -4,5 +4,9 @@ require 'east/bank'
 require 'east/table'
 
 module East
-  ROOT_DIR = Pathname.new('..').realpath
+  attr_accessor :logger, :root
+  extend self
 end
+
+East.root = Pathname.new(File.expand_path('..', __FILE__))
+East.logger = Logger.new(East.root.join('log/east.log'))

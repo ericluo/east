@@ -8,11 +8,9 @@ require 'csv'
 
 module East
 
-
   class Bank
-    $config = YAML.load_file(ROOT_DIR.join('config/east.yaml'))
+    $config = YAML.load_file(East.root.join('config/east.yaml'))
     attr_reader :name, :schema, :license, :tables
-
 
     def initialize(name)
       bank = $config[name]
@@ -22,7 +20,7 @@ module East
       @license = bank[:license]
       @name = name
 
-      @tables = ::CSV.read(ROOT_DIR.join('config/tables.csv', headers: true)).inject([]) do |ts, r|
+      @tables = ::CSV.read(East.root.join('config/tables.csv', headers: true)).inject([]) do |ts, r|
         ts << Table.new(self, r)
       end
 
