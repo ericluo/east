@@ -2,7 +2,6 @@
 
 require 'yaml'
 require 'pathname'
-require 'logger'
 require 'resque'
 require 'csv'
 

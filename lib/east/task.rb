@@ -6,6 +6,10 @@ module East
   class LoadDataTask
     @queue = :load_data
 
+    def logger
+      East.logger
+    end
+
     def self.perform(bank_name, table_code, command)
       bank = Bank.new(bank_name)
       prepare(bank.schema)
