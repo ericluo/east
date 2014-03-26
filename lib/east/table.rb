@@ -6,13 +6,13 @@ module East
     attr_accessor :category, :code, :cname, :ename, :iname
     attr_reader   :bank
 
-    def initialize(bank, record)
+    def initialize(bank, category, code, cname, ename, iname)
       @bank     = bank
-      @category = record['接口类']
-      @code     = record['表号']
-      @cname    = record['表中文名']
-      @ename    = record['表英文名']
-      @iname    = record['接口文件名']
+      @category = category
+      @code     = code
+      @cname    = cname
+      @ename    = ename
+      @iname    = iname
     end
 
     def find(bank, code)

@@ -3,7 +3,7 @@
 公共信息类数据结构,102,员工表,T_GX_YGB,YGB
 公共信息类数据结构,103,柜员表,T_GX_GYB,GYB
 公共信息类数据结构,104,岗位信息表,T_GX_GWXX,GWXXB
-会计记账信息类数据结构,201,总账会计全科目表,T_KJ_ZZQKM,ZZHJQKMB
+会计记账信息类数据结构,201,总账会计全科目表,T_KJ_ZZQKM,ZZKJQKMB
 会计记账信息类数据结构,202,统计科目口径对照表,T_KJ_TJKMKJ,TJKMKJDZB
 会计记账信息类数据结构,203,内部科目对照表,T_KJ_NBKMKJ,NBKMDZB
 会计记账信息类数据结构,204,个人活期存款分户账,T_KJ_GRHCFZ,GRHQCKFHZ

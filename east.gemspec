@@ -1,11 +1,14 @@
-$LOAD_PATH.unshift 'lib'
+# coding: utf-8
+lib = File.expand_path('../lib/', __FILE__)
+$:.unshift lib unless $:.include?(lib)
+require 'east/version'
 
 Gem::Specification.new do |s|
   s.name                  = 'east'
-  s.version               = '0.0.1'
+  s.version               = East::VERSION
   s.date                  = Time.now.strftime('%Y-%m-%d')
   s.homepage              = 'https://github.com/ericluo/east'
-  s.summary               = 'East system administrator'
+  s.summary               = 'East system administrater'
   s.email                 = 'eric.wenbl@gmail.com'
   s.authors               = ['Eric Luo']
 

@@ -1,27 +1,28 @@
 # encoding: utf-8
 
-require 'yaml'
-require 'pathname'
 require 'resque'
 require 'csv'
 
 module East
 
   class Bank
-    $config = YAML.load_file(East.root.join('config/east.yaml'))
     attr_reader :name, :schema, :license, :tables
 
     def initialize(name)
-      bank = $config[name]
+      bank = East.config[name]
       raise "Cloudn't find config parameter for bank #{name}" unless bank
       
       @schema = bank[:schema]
       @license = bank[:license]
       @name = name
 
-      @tables = ::CSV.read(East.root.join('config/tables.csv', headers: true)).inject([]) do |ts, r|
-        ts << Table.new(self, r)
+      @tables = CSV.read(East.root.join('config/tables.csv'), headers: true).map do |row|
+        Table.new(self, *row.fields)
       end
+      
+      # @tables = CSV.read(East.root.join('config/tables.csv'), headers: true).inject([]) do |ts, r|
+      #   ts << Table.new(self, *r.fields)
+      # end
 
     end
 
