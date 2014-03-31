@@ -1,13 +1,19 @@
-require 'east'
+require 'rake/testtask'
 require 'resque/tasks'
 
-require 'rake/testtask'
 
-Rake::TestTask.new do |t|
-  t.libs.push 'spec'
-  t.pattern = 'spec/**/*_spec.rb'
-  t.warning = true
-  t.verbose = true
+namespace :east do
+  Rake::TestTask.new do |t|
+    t.test_files = Dir['test/east/*_spec.rb']
+  end
+
 end
 
-task :default => :test
+task "resque:setup" do
+  ENV['QUEUE'] = 'data_loader'
+  ENV['COUNT'] = '2'
+  $:.unshift(File.join(File.dirname(__FILE__), "lib"))
+  require 'east'
+end
+
+task :default => 'east:test'
