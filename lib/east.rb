@@ -16,3 +16,4 @@ East.logger = Logger.new(East.root.join('log/east.log'))
 require 'east/bank'
 require 'east/table'
 require 'east/version'
+require 'east/cli'
