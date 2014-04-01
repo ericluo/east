@@ -9,7 +9,7 @@ module East
       extend Resque::Plugins::History
 
       def self.perform(file, incremental)
-        sd = ::East::StandardData.new(file, incremental)
+        sd = StandardData.new(file, incremental)
         sd.load
       end
     end

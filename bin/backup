@@ -1,3 +1,5 @@
+# -*- mode: enh-ruby -*-
+
 require 'fileutils'
 require 'pathname'
 require 'date'

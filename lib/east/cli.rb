@@ -1,10 +1,10 @@
 # encoding: utf-8
 
-require 'thor'
 require 'open3'
 require 'stringio'
-require 'east'
-require 'pry'
+require 'fileutils'
+
+require 'thor'
 
 module East
   class CLI < Thor
@@ -80,13 +80,13 @@ module East
     def import(dir)
       incremental = options[:incremental]
       sds = if File.directory?(dir)
-        files = Dir[File.join(dir, options[:glob])]
-        files.map {|file| StandardData.new(file, incremental)}
-      elsif File.exist?(dir)
-        [StandardData.new(dir, incremental)]
-      else
-        raise ArgumentError, "import file or directory"
-      end
+              files = Dir[File.join(dir, options[:glob])]
+              files.map {|file| StandardData.new(file, incremental)}
+            elsif File.exist?(dir)
+              [StandardData.new(dir, incremental)]
+            else
+              raise ArgumentError, "import file or directory"
+            end
 
       # opts = @options.symbolize_keys.slice(:replace, :after) if @options
       # sds = East::DataLoader.new(dir, options[:glob]).sds
@@ -99,6 +99,23 @@ module East
       end
     end
 
+    desc "backup DIR", "backup eastansy database to DIR"
+    def backup(dir = "d:/backup/")
+      backup_dir = Pathname.new(dir).join(Date.today.to_s)
+      if backup_dir.directory?
+        puts "#{backup_dir} exist, please remove the directory first or backup to another location"
+        exit 1
+      else
+        FileUtils.cd(backup_dir) do
+          run("db2look -d eastansy -l -e -o eastansy.ddl")
+        end
+        data_dir = backup_dir.join("db2move")
+        FileUtils.cd(data_dir) do
+          run("db2move eastansy export -sn eastansy")
+        end
+      end
+    end
+
     desc "drop_tmp_tables LIMIT", "drop temporary tables before LIMIT days ago"
     def drop_tmp_tables(limit = 1)
       gen_date = (Time.now - limit.to_i.days).strftime('%Y-%m-%d')
@@ -107,7 +124,6 @@ module East
         select tabschema, tabname from syscat.tables where tabname like 'CBRC%' and last_regen_time < to_date('#{gen_date}', 'yyyy-mm-dd')
       end
 
-      binding.pry
       lines = output.drop(28)[0..-2]
       create_file("sql/drop_tmp_tables.sql") do
         stmt = "connect to eastst user db2inst1 using db2inst1;\n"
@@ -125,7 +141,7 @@ module East
         connect to eastst user db2inst1 using db2inst1
         db2 alter tablespace EASTRUNDATA reduce
       end
-  
+      
     end
 
     # TODO truncate the database
