@@ -37,8 +37,9 @@ module East
       end
 
       def instance(file)
+        file = Pathname(file)
         basename = file.basename(file.extname)
-        license, iname, _ = basename.scan /\w+/
+        license, iname, _ = basename.to_s.scan /\w+/
         table = Table[iname]
       end
     end

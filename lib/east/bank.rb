@@ -3,6 +3,7 @@
 require 'resque'
 require 'csv'
 require 'pathname'
+require 'yaml'
 
 module East
 
@@ -10,7 +11,10 @@ module East
     attr_reader :name, :schema, :license, :tables
 
     def initialize(license)
-      cfg = Pathname.new(__FILE__).dirname.join('../../config/east.yml')
+      cfg_file = Pathname.new(__FILE__).dirname.join('../../config/east.yml')
+      # cfg = YAML.load(cfg_file)
+      cfg = YAML.load(File.expand_path('../../config/east.yml', __FILE__))
+      puts cfg
       raise "No Bank found for license: #{license}" unless cfg[license]
       @license = license
       @schema = cfg[license][:schema]
