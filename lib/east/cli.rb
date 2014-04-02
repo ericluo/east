@@ -19,7 +19,7 @@ module East
       @password = options[:password]
       ["create_eastst.sql.erb"].each do |file|
         dest = File.basename(file).sub(/\.erb$/, '')
-        template file, East::ROOT.join("sql", dest)
+        template file, East.root.join("sql", dest)
       end
       
       schemas(options).each do |schema|
@@ -27,7 +27,7 @@ module East
 
         ["create_table.sql.erb", "grant.sql.erb", "runstat.sql.erb"].each do |file|
           dest = File.basename(file).sub(/\.erb$/, '')
-          template file, East::ROOT.join("sql", @schema.downcase, dest)
+          template file, East.root.join("sql", @schema.downcase, dest)
         end
       end
     end
@@ -156,7 +156,7 @@ module East
     private
     # used by thor to find the template
     def self.source_root
-      East::ROOT.join("template")
+      East.root.join("template")
     end
 
     def schemas(options)

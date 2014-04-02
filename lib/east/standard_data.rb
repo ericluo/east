@@ -11,9 +11,11 @@ module East
 
     @queue = :data_loader
 
-    def initialize(file, incremental)
+    
+
+    def initialize(file, mode = nil)
       @file = file
-      @incremental = incremental
+      @mode = incremental
       @license, @interface, @gdate = basename.scan /\w+/
     end
 

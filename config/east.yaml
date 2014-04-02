@@ -1,3 +1,8 @@
-hkb:
-  schema: 'hkyh'
-  license: 'BXXXXXXX'
+B0187H242010002:
+  schema: 'HKYH'
+B1151H242010001: 
+  schema: 'HBYH'
+E0001H242010001:
+  schema: 'HBNX'
+B1029H242010001:
+  schema: 'WHRC'

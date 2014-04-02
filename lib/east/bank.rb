@@ -2,28 +2,23 @@
 
 require 'resque'
 require 'csv'
+require 'pathname'
 
 module East
 
   class Bank
     attr_reader :name, :schema, :license, :tables
 
-    def initialize(name)
-      bank = East.config[name]
-      raise "Cloudn't find config parameter for bank #{name}" unless bank
-      
-      @schema = bank[:schema]
-      @license = bank[:license]
-      @name = name
+    def initialize(license)
+      cfg = Pathname.new(__FILE__).dirname.join('../../config/east.yml')
+      raise "No Bank found for license: #{license}" unless cfg[license]
+      @license = license
+      @schema = cfg[license][:schema]
 
       @tables = CSV.read(East.root.join('config/tables.csv'), headers: true).map do |row|
         Table.new(self, *row.fields)
       end
       
-      # @tables = CSV.read(East.root.join('config/tables.csv'), headers: true).inject([]) do |ts, r|
-      #   ts << Table.new(self, *r.fields)
-      # end
-
     end
 
     def async_load_data(dir, gather_date, append = false)
