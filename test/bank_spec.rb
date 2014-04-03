@@ -1,6 +1,6 @@
 require_relative 'spec_helper'
-
-describe 'Bank' do
+ 
+describe East::Bank do
   describe 'when initialized with the given name' do
     it 'returned with associated tables' do
       bank = East::Bank.new('B0187H242010002')

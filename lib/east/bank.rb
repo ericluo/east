@@ -11,16 +11,14 @@ module East
     attr_reader :name, :schema, :license, :tables
 
     def initialize(license)
-      cfg_file = Pathname.new(__FILE__).dirname.join('../../config/east.yml')
-      # cfg = YAML.load(cfg_file)
-      cfg = YAML.load(File.expand_path('../../config/east.yml', __FILE__))
-      puts cfg
+      root_dir = Pathname(__FILE__).dirname.join('..', '..')
+      cfg = YAML.load_file(root_dir.join('config', 'east.yaml'))
       raise "No Bank found for license: #{license}" unless cfg[license]
       @license = license
       @schema = cfg[license][:schema]
 
-      @tables = CSV.read(East.root.join('config/tables.csv'), headers: true).map do |row|
-        Table.new(self, *row.fields)
+      @tables = CSV.read(root_dir.join('config', 'tables.csv'), headers: true).map do |row|
+        Table.new(*row.fields)
       end
       
     end
