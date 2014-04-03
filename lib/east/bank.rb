@@ -7,20 +7,30 @@ require 'yaml'
 
 module East
 
+  ROOT_DIR = Pathname(__FILE__).dirname.join('..', '..')
+  BANK_CFG = YAML.load_file(ROOT_DIR.join('config', 'east.yaml'))
+  TABLE_CFG = ROOT_DIR.join('config', 'tables.csv')
+
   class Bank
-    attr_reader :name, :schema, :license, :tables
+    attr_reader :schema, :license, :tables
 
-    def initialize(license)
-      root_dir = Pathname(__FILE__).dirname.join('..', '..')
-      cfg = YAML.load_file(root_dir.join('config', 'east.yaml'))
-      raise "No Bank found for license: #{license}" unless cfg[license]
-      @license = license
-      @schema = cfg[license][:schema]
-
-      @tables = CSV.read(root_dir.join('config', 'tables.csv'), headers: true).map do |row|
-        Table.new(*row.fields)
+    class << self
+      def instances
+        @instances ||= BANK_CFG.each_pair.collect {|k, v| Bank.new(k, v["schema"])}
       end
       
+      def [](license)
+        instances.find {|bank| bank.license == license}
+      end
+    end
+
+    def initialize(license, schema)
+      @license = license
+      @schema  = schema
+
+      @tables = CSV.read(TABLE_CFG, headers: true).map do |row|
+        t = Table.new(*row.fields, schema)
+      end
     end
 
     def async_load_data(dir, gather_date, append = false)

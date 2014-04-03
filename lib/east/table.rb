@@ -9,50 +9,47 @@ module East
 
     class << self
 
-      def [](index)
-        cfg = Pathname.new(__FILE__).dirname.join('../../config/tables.csv')
-        tables = CSV.read(cfg, headers: true).map do |row|
-          Table.new(*row.fields)
+      def [](cond)
+        ts ||= CSV.read(TABLE_CFG, headers: true).map {|r| Table.new(*r.fields, nil)}
+        ts.find {|t| [t.ename, t.iname, t.code].include?(cond)}
+      end
+       
+      # load all data files in dir with extname
+      def load(dir, glob: '*.txt', sync: nil, mode: nil)
+        path   = Pathname.new(dir)
+        files  = path.file? ? [path] : path.join(glob).entries
+
+        files.map do |file|
+          basename = file.basename(file.extname)
+          license, iname, _ = basename.to_s.scan /\w+/
+
+          table = Bank[license].tables.find{|t| t.iname = iname}
+          table.load(file, sync, mode)
         end
-        tables.find {|t| [t.code, t.ename, t.iname].include?(index)}
-      end
-
-      def load(dir, glob: '*.txt', sync: false, mode: 'R')
-        path = Pathname.new(dir)
-        tables = if path.directory?
-                   Dir[File.join(dir, glob)].map{|f| Table.new(f, mode)}
-                 elsif path.exist?
-                   [Table.new(path, mode)]
-                 else
-                   raise ArgumentError, "#{dir} not exists"
-                 end
-
-        # tables.each do |sd|
-        #   if options[:sync]
-        #     sd.load
-        #   else
-        #     sd.async_load
-        #   end
-        # end
-      end
-
-      def instance(file)
-        file = Pathname(file)
-        basename = file.basename(file.extname)
-        license, iname, _ = basename.to_s.scan /\w+/
-        table = Table[iname]
       end
     end
 
-    def initialize(category, code, cname, ename, iname, mode)
+    def initialize(category, code, cname, ename, iname, mode, schema)
       @category = category
       @code     = code
       @cname    = cname
       @ename    = ename
       @iname    = iname
       @mode     = mode
+
+      @schema   = schema
     end
 
+    # TODO load data into database 
+    def load(file, sync, mode)
+      action = case mode
+               when "I" then "insert"
+               when "R" then "replace"
+               else Table[iname].mode
+               end
+      "db2 load from #{file} of del #{action} into #{schema}.#{ename}"
+    end
+    
     def find(bank, code)
       bank.tables.select{|table| table.code == code}
     end
@@ -62,13 +59,8 @@ module East
       Pathname.new(dir).join(basename)
     end
 
-    def schema
-      bank.schema
-    end
-
     def to_load_command(fname, append)
       if append
-        "db2 load from #{fname} of del insert into #{schema}.#{ename}"
       else
         "db2 load from #{fname} of del replace into #{schema}.#{ename}"
       end
