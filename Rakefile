@@ -4,7 +4,7 @@ require 'resque/tasks'
 
 namespace :east do
   Rake::TestTask.new do |t|
-    t.test_files = Dir['test/*_spec.rb']
+    t.test_files = Dir['test/**/*_test.rb']
   end
 end
 

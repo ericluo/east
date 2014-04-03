@@ -18,10 +18,9 @@ module East
       def load(dir, glob: '*.txt', sync: nil, mode: nil)
         path   = Pathname.new(dir)
         files  = path.file? ? [path] : path.join(glob).entries
-
         files.map do |file|
           basename = file.basename(file.extname)
-          license, iname, _ = basename.to_s.scan /\w+/
+          license, iname, _ = basename.to_s.scan(/\w+/)
 
           table = Bank[license].tables.find{|t| t.iname = iname}
           table.load(file, sync, mode)
