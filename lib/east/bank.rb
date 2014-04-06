@@ -16,11 +16,15 @@ module East
 
     class << self
       def instances
-        @instances ||= BANK_CFG.each_pair.collect {|k, v| Bank.new(k, v["schema"])}
+        @instances ||=  {} 
       end
       
       def [](license)
-        instances.find {|bank| bank.license == license}
+        if cfg = BANK_CFG[license]
+          instances[license] ||= Bank.new(license, cfg["schema"])
+        else
+          raise ArgumentError, "No bank exist for license: #{license}"
+        end
       end
     end
 
@@ -28,9 +32,7 @@ module East
       @license = license
       @schema  = schema
 
-      @tables = CSV.read(TABLE_CFG, headers: true).map do |row|
-        t = Table.new(*row.fields, schema)
-      end
+      @tables = CSV.read(TABLE_CFG, headers: true).map {|t| Table.new(*t.fields, schema)}
     end
 
     def async_load_data(dir, gather_date, append = false)
