@@ -16,15 +16,16 @@ module East
 
     class << self
       def instances
-        @instances ||=  {} 
+        @instances ||=  BANK_CFG.inject({}) do |memo, cfg|
+          license, schema = cfg.first, cfg.last["schema"]
+          memo[license] = Bank.new(license, schema)
+          memo
+        end
       end
       
       def [](license)
-        if cfg = BANK_CFG[license]
-          instances[license] ||= Bank.new(license, cfg["schema"])
-        else
-          raise ArgumentError, "No bank exist for license: #{license}"
-        end
+        raise ArgumentError, "No bank exist for license: #{license}" unless instances[license]
+        instances[license]
       end
     end
 
