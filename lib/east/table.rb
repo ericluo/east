@@ -14,17 +14,30 @@ module East
         ts.find {|t| [t.ename, t.iname, t.code].include?(cond)}
       end
        
+      def find_by(file)
+        file = Pathname(file)
+        basename = file.basename(file.extname)
+        license, iname, _ = basename.to_s.scan(/\w+/)
+
+        Bank[license].tables.find {|t| t.iname == iname}
+      end
+        
       # load all data files in dir with extname
       def load(dir, glob: '*.txt', sync: nil, mode: nil)
+        status = {success: [], fail: []}
         path   = Pathname.new(dir)
         files  = path.file? ? [path] : path.join(glob).entries
-        files.map do |file|
-          basename = file.basename(file.extname)
-          license, iname, _ = basename.to_s.scan(/\w+/)
 
-          table = Bank[license].tables.find{|t| t.iname = iname}
-          table.load(file, sync, mode)
+        files.each do |file|
+          table = find_by(file)
+          if table
+            status[:success] << file
+            table.load(file, sync: sync, mode: mode)
+          else
+            status[:fail] << file
+          end
         end
+        status
       end
     end
 
@@ -40,7 +53,7 @@ module East
     end
 
     # TODO load data into database 
-    def load(file, sync, mode)
+    def load(file, sync: false, mode: nil)
       action = case mode
                when "I" then "insert"
                when "R" then "replace"
@@ -51,18 +64,6 @@ module East
     
     def find(bank, code)
       bank.tables.select{|table| table.code == code}
-    end
-
-    def fname(dir, gather_date)
-      basename = "#{bank.license}-#{iname}-#{gather_date}.txt"
-      Pathname.new(dir).join(basename)
-    end
-
-    def to_load_command(fname, append)
-      if append
-      else
-        "db2 load from #{fname} of del replace into #{schema}.#{ename}"
-      end
     end
 
   end
