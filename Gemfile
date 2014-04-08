@@ -1,6 +1,7 @@
 # gem 'hoe'
 source 'http://ruby.taobao.org'
 
+gem 'rake'
 gem 'thor'
 # gem 'activesupport'
 
