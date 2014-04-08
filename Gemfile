@@ -3,14 +3,19 @@ source 'http://ruby.taobao.org'
 
 gem 'rake'
 gem 'thor'
-gem 'active_support'
+# gem 'activesupport'
+
+group :test do
+  gem 'minitest' # , ">=5.0.0"
+end
 
 group :development do
   gem 'pry'
   gem 'pry-doc'
   gem 'pry-rescue'
-  gem 'pry-debugger'
   gem 'pry-stack_explorer'
+
+  gem 'guard-minitest'
 end
 
 gem 'resque'

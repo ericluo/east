@@ -3,8 +3,8 @@
 require 'bundler/setup'
 
 require 'pry'
-require 'active_support'
-require 'active_support/core_ext/hash'
+# require 'active_support'
+# require 'active_support/core_ext/hash'
 
 require 'pathname'
 require 'open3'

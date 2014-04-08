@@ -16,7 +16,7 @@ module East
     def initialize(file, mode = nil)
       @file = file
       @mode = incremental
-      @license, @interface, @gdate = basename.scan /\w+/
+      @license, @interface, @gdate = basename.scan(/\w+/)
     end
 
     def basename ; File.basename(@file, File.extname(@file)); end
