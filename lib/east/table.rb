@@ -32,7 +32,7 @@ module East
         status = {success: [], fail: []}
         files.each do |file|
           begin
-            load(file, sync: sync, mode: mode)
+            load_file(file, sync: sync, mode: mode)
             status[:success] << file
           rescue ArgumentError
             status[:fail] << file
@@ -42,11 +42,11 @@ module East
         status
       end
 
-      def load(file, sync: false, mode: nil)
+      def load_file(file, sync: false, mode: nil)
         table = find_by(file)
         raise ArgumentError, "No table found for #{file}" unless table
         if sync
-          table.load(file, mode: mode)
+          table.load_file(file, mode: mode)
         else
           Resque.enqueue(Job::DataLoader, file, mode)
         end
@@ -66,14 +66,10 @@ module East
     end
 
     # TODO load data into database 
-    def load(file, mode: nil)
-      action = case mode
-               when "I" then "insert"
-               when "R" then "replace"
-               else Table[iname].mode
-               end
+    def load_file(file, mode: nil)
+      mode ||= Table[iname].mode
+      action = ("R" == mode) ? "replace" : "insert"
       cmd = "db2 load from #{file} of del #{action} into #{schema}.#{ename}"
-      system(cmd)
     end
     
   end

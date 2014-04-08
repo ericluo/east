@@ -10,11 +10,15 @@ module East
     
     describe '.load' do
       it "queue the load job when file pattern matched" do
-        proc { Table.load(@file, mode: 'I') }.must_change(Resque, :size, :data_loader, 1)
+        before = Resque.size(:data_loader)
+        Table.load_file(@file, mode: 'I')
+        after = Resque.size(:data_loader)
+        assert_equal 1, after - before
+        # proc { Table.load_file(@file, mode: 'I') }.must_change(Resque, :size, :data_loader, 1)
       end
 
       it "raise exception when file pattern malformatted" do
-        proc { Table.load(@dismatched_file) }.must_raise ArgumentError
+        proc { Table.load_file(@dismatched_file) }.must_raise ArgumentError
       end
     end
 
@@ -28,6 +32,7 @@ module East
 
     it "generate sql script for the given file" do
       table = Table.find_by(@file)
+      table.load_file(@file)
       # table.load(@file, mode: "I").must_equal <<-SQL.chomp.strip
       #   db2 load from #{@file} of del insert into HKYH.T_GX_JGXX
       # SQL
