@@ -5,6 +5,7 @@ require 'csv'
 require 'resque'
 
 module East
+    
   class Table
     attr_accessor :category, :code, :cname, :ename, :iname, :mode
     attr_accessor :schema
@@ -20,38 +21,21 @@ module East
         file = Pathname(file)
         basename = file.basename(file.extname)
         license, iname, _ = basename.to_s.scan(/\w+/)
-
         Bank[license].tables.find {|t| t.iname == iname}
+      rescue ArgumentError
+        nil
       end
 
-      # load all data files in dir with extname
-      def batch_load(dir, pattern: '*.txt', sync: false, mode: nil)
+      def load_files(dir, pattern: '*.txt', sync: false, mode: nil)
         path   = Pathname.new(dir)
         files  = path.file? ? [path] : Pathname.glob(path.join(pattern)).entries
 
-        status = {success: [], fail: []}
-        files.each do |file|
-          begin
-            load_file(file, sync: sync, mode: mode)
-            status[:success] << file
-          rescue ArgumentError
-            status[:fail] << file
-          end
-        end
+        formatted = files.select {|f| find_by(f)}
+        malformatted = files - formatted
+        formatted.each {|file| find_by(file).load_file(file, sync, mode)}
 
-        status
+        {success: formatted, fail: malformatted}
       end
-
-      def load_file(file, sync: false, mode: nil)
-        table = find_by(file)
-        raise ArgumentError, "No table found for #{file}" unless table
-        if sync
-          table.load_file(file, mode: mode)
-        else
-          Resque.enqueue(Job::DataLoader, file, mode)
-        end
-      end
-      
     end
 
     def initialize(category, code, cname, ename, iname, mode, schema)
@@ -66,10 +50,15 @@ module East
     end
 
     # TODO load data into database 
-    def load_file(file, mode: nil)
+    def load_file(file, sync, mode)
       mode ||= Table[iname].mode
       action = ("R" == mode) ? "replace" : "insert"
-      cmd = "db2 load from #{file} of del #{action} into #{schema}.#{ename}"
+      if sync
+        cmd = "db2 load from #{file} of del #{action} into #{schema}.#{ename}"
+        system(cmd)
+      else
+        Resque.enqueue(Job::DataLoader, file, mode)
+      end
     end
     
   end
