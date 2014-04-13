@@ -26,15 +26,27 @@ module East
         nil
       end
 
-      def load_files(dir, pattern: '*.txt', sync: false, mode: nil)
-        path   = Pathname.new(dir)
-        files  = path.file? ? [path] : Pathname.glob(path.join(pattern)).entries
+      # check criteria
+      #  license
+      #  iname, interface file name 
+      def check(dir, glob: '*.txt')
+        path         = Pathname.new(dir)
+        files        = path.file? ? [path] : Pathname.glob(path.join(glob)).entries
+        mfs = files.reject {|f| find_by(f)}
+        fs  = files - mfs
 
-        formatted = files.select {|f| find_by(f)}
-        malformatted = files - formatted
-        formatted.each {|file| find_by(file).load_file(file, sync, mode)}
 
-        {success: formatted, fail: malformatted}
+        if block_given?
+          yield fs, mfs
+        else
+          [fs, mfs]
+        end
+      end
+        
+      def load_files(dir, glob: '*.txt', sync: false, mode: nil)
+        fs, mfs = check(dir, glob: glob)
+        fs.each {|file| find_by(file).load_file(file, sync, mode)}
+        {success: fs, fail: mfs}
       end
     end
 

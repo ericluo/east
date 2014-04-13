@@ -59,11 +59,9 @@ module East
     end
 
     desc "check DIR", "check whether the name of files in the given DIR is valid"
-    option :glob, aliases: ['-g'], type: :string, default: '*.txt'
+    option :pattern, aliases: ['-p'], type: :string, default: '*.txt'
     def check(dir)
-      files = Dir[File.join(dir, options[:glob])]
-      sds = files.map {|file| StandardData.new(file)}
-      malformat = sds.reject(&:valid?)
+      path = Pathname(dir)
 
       puts "*" * 70
       puts "文件总数: #{sds.size}"
@@ -73,30 +71,11 @@ module East
     end
 
     desc "import DIR", "import data from the given directory"
-    option :sync,         :aliases => ["-s"], :type => :boolean, :default => false
-    option :glob,         :aliases => ['-g'], :type => :string,  :default => '*.txt'
-    option :incremental,  :aliases => ["-i"], :type => :boolean, :default => true
-    option :after,        :aliases => [],     :type => :string
+    option :sync, :aliases => ["-s"], :type => :boolean, :default => false
+    option :glob, :aliases => ['-g'], :type => :string,  :default => '*.txt'
+    option :mode, :aliases => ["-m"], :type => :boolean, :default => true
     def import(dir)
-      incremental = options[:incremental]
-      sds = if File.directory?(dir)
-              files = Dir[File.join(dir, options[:glob])]
-              files.map {|file| StandardData.new(file, incremental)}
-            elsif File.exist?(dir)
-              [StandardData.new(dir, incremental)]
-            else
-              raise ArgumentError, "import file or directory"
-            end
-
-      # opts = @options.symbolize_keys.slice(:replace, :after) if @options
-      # sds = East::DataLoader.new(dir, options[:glob]).sds
-      sds.each do |sd|
-        if options[:sync]
-          sd.load
-        else
-          sd.async_load
-        end
-      end
+      Table.load_files(dir, glob: options[:glob], sync: options[:sync], mode: options[:mode])
     end
 
     desc "backup DIR", "backup eastansy database to DIR"

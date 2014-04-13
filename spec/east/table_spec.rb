@@ -7,6 +7,21 @@ module East
       @file = @dir.join('B0187H242010002-JGXXB-20140228.txt')
       @dismatched_file = @dir.join('malformatted.txt')
     end
+
+    describe "check file names match the pattern" do
+      it "check with block" do 
+        Table.check(@dir) do |fs, mfs|
+          fs.size.must_equal 1
+          mfs.size.must_equal 1
+        end
+      end
+      
+      it "check without block" do
+        fs, mfs = Table.check(@dir)
+        fs.size.must_equal 1
+        mfs.size.must_equal 1
+      end
+    end
     
     describe '.load_files' do
       it "batch load files and return the status" do
