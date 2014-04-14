@@ -21,4 +21,9 @@ module Minitest::Guard
   def linux? platform = RUBY_PLATFORM
     /linux/ =~ platform
   end
+
+  def mac? platform = RUBY_PLATFORM
+    /darwin/ =~ platform
+  end
+  
 end
