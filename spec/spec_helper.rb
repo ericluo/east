@@ -17,3 +17,8 @@ module Minitest::Expectations
   infect_an_assertion :assert_changes, :must_change
 end
 
+module Minitest::Guard
+  def linux? platform = RUBY_PLATFORM
+    /linux/ =~ platform
+  end
+end
