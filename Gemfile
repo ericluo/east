@@ -2,7 +2,7 @@ source 'http://ruby.taobao.org'
 
 gem 'rake'
 gem 'thor'
-# gem 'activesupport'
+gem 'activesupport'
 
 group :test do
   gem 'minitest' # , ">=5.0.0"

@@ -1,16 +1,21 @@
 # encoding: utf-8
-
 require 'open3'
 require 'stringio'
+require 'pathname'
 require 'fileutils'
-
 require 'thor'
+
+require 'east/table'
 
 module East
   class CLI < Thor
     include Thor::Actions
 
-    desc "generate", "generate sql script"
+    check_unknown_options!
+    stop_on_unknown_option!
+    # default_task :exec
+
+    desc "generate", "生成数据库建表脚本"
     option :schemas, type: :string, required: true, default: :all
     option :username, type: :string, default: "db2inst1"
     option :password, type: :string, default: "db2inst1"
@@ -32,7 +37,7 @@ module East
       end
     end
 
-    desc "create DATABASE DIR", "create database on the given path"
+    desc "create DATABASE DIR", "在指定路径创建数据库"
     def create(dbname, dir)
       # add user for database
       run "sudo useradd -g db2iadm1 #{dbname}"
@@ -42,7 +47,7 @@ module East
       run "db2 -tvf sql/create_#{dbname}.sql > log/create_#{dbname}.log"
     end
 
-    desc "setup", "setup database and dbuser for given schemas"
+    desc "setup", "初始化数据库"
     option :schemas, type: :string, default: :all
     def setup
       schemas(options).each do |schema|
@@ -58,74 +63,38 @@ module East
       end
     end
 
-    desc "check DIR", "check whether the name of files in the given DIR is valid"
-    option :pattern, aliases: ['-p'], type: :string, default: '*.txt'
+    desc "check DIR", "检查数据文件的文件名格式"
+    option :glob, aliases: ['-g'], type: :string, default: '*.txt'
     def check(dir)
-      path = Pathname(dir)
-
-      puts "*" * 70
-      puts "文件总数: #{sds.size}"
-      puts "文件名格式错误数: #{malformat.size}"
-      puts "*" * 25 + "--格式错误文件列表--" + "*" * 25
-      malformat.each {|mf| puts "  #{mf.file}"}
+      require 'east/cli/check'
+      Check.new(options, dir).run
     end
 
-    desc "import DIR", "import data from the given directory"
+    desc "import DIR", "导入指定目录的数据文件"
     option :sync, :aliases => ["-s"], :type => :boolean, :default => false
     option :glob, :aliases => ['-g'], :type => :string,  :default => '*.txt'
     option :mode, :aliases => ["-m"], :type => :boolean, :default => true
     def import(dir)
-      Table.load_files(dir, glob: options[:glob], sync: options[:sync], mode: options[:mode])
+      require 'east/cli/import'
+      Import.new(options, dir).run
     end
 
-    desc "backup DIR", "backup eastansy database to DIR"
-    def backup(dir = "d:/backup/")
-      backup_dir = Pathname.new(dir).join(Date.today.to_s)
-      if backup_dir.directory?
-        puts "#{backup_dir} exist, please remove the directory first or backup to another location"
-        exit 1
-      else
-        FileUtils.cd(backup_dir) do
-          run("db2look -d eastansy -l -e -o eastansy.ddl")
-        end
-        data_dir = backup_dir.join("db2move")
-        FileUtils.cd(data_dir) do
-          run("db2move eastansy export -sn eastansy")
-        end
-      end
+    desc "backup", "备份模型数据库(EASTANSY)"
+    option :directory, :type => :string, :default => "d:/backup"
+    def backup
+      require 'east/cli/backup'
+      Backup.new(options, self).run
     end
 
-    desc "drop_tmp_tables LIMIT", "drop temporary tables before LIMIT days ago"
+    desc "drop_tmp_tables LIMIT", "删除过期临时数据表"
     def drop_tmp_tables(limit = 1)
-      gen_date = (Time.now - limit.to_i.days).strftime('%Y-%m-%d')
-      output = db2 "-x", <<-end
-        connect to eastst user db2inst1 using db2inst1
-        select tabschema, tabname from syscat.tables where tabname like 'CBRC%' and last_regen_time < to_date('#{gen_date}', 'yyyy-mm-dd')
-      end
-
-      lines = output.drop(28)[0..-2]
-      create_file("sql/drop_tmp_tables.sql") do
-        stmt = "connect to eastst user db2inst1 using db2inst1;\n"
-        lines.inject(stmt) do |memo, line|
-          schema, tabname = line.split(" ")
-          memo <<  "drop table #{schema}.#{tabname};\n"
-        end
-        stmt
-      end
-
-      run "db2 -tvf sql/drop_tmp_tables.sql"
-
-      # reduce tablespace EASTRUNDATA
-      db2 "-x", <<-end
-        connect to eastst user db2inst1 using db2inst1
-        db2 alter tablespace EASTRUNDATA reduce
-      end
-      
+      require 'east/cli/drop_tmp_tables'
+      DropTmpTables.new(options, limit, self).run
     end
 
     # TODO truncate the database
     # truncate table schema.tabname immediate
-    desc "clean", "empty given schemas"
+    desc "clean", "清空数据表"
     def clean
       schemas(options).each do |schema|
         run "db2 -tvf sql/truncate.sql"

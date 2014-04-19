@@ -1,8 +1,9 @@
 # encoding: utf-8
 require 'pathname'
 require 'csv'
-
 require 'resque'
+
+require 'east/bank'
 
 module East
     
@@ -30,17 +31,12 @@ module East
       #  license
       #  iname, interface file name 
       def check(dir, glob: '*.txt')
-        path         = Pathname.new(dir)
-        files        = path.file? ? [path] : Pathname.glob(path.join(glob)).entries
-        mfs = files.reject {|f| find_by(f)}
-        fs  = files - mfs
+        path  = Pathname.new(dir)
+        files = path.file? ? [path] : Pathname.glob(path.join(glob)).entries
+        mfs   = files.reject {|f| find_by(f)}
+        fs    = files - mfs
 
-
-        if block_given?
-          yield fs, mfs
-        else
-          [fs, mfs]
-        end
+        [fs, mfs]
       end
         
       def load_files(dir, glob: '*.txt', sync: false, mode: nil)

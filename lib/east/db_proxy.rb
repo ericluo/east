@@ -12,8 +12,14 @@ module East
       end
     end
 
-    def db2(opts, input)
-      Open3.popen2e("db2 #{opts}")
+    def db2(opts, stream = '')
+      Open3.popen3("#{DB2} #{opts}") do |i, o, e, t|
+        block_given? ? yield(i) : i.puts(stream)
+        i.close
+
+        o.readlines
+      end
     end
+
   end
 end

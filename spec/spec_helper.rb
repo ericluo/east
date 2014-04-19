@@ -2,6 +2,10 @@ require 'minitest/autorun'
 require 'minitest/pride'
 require 'east'
 
+Dir["#{File.expand_path('../support', __FILE__)}/*.rb"].each do |file|
+  require file unless file =~ /fakeweb\/.*\.rb/
+end
+
 module Minitest::Assertions
   def assert_changes(obj, method, *args, exp_diff)
     before = obj.send(method, *args)
@@ -25,5 +29,4 @@ module Minitest::Guard
   def mac? platform = RUBY_PLATFORM
     /darwin/ =~ platform
   end
-  
 end
