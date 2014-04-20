@@ -1,4 +1,4 @@
-CONNECT TO EASTST user db2inst1 using db2inst1 ;
+CONNECT TO EASTST user db2inst1 using wanyue0916 ;
 set current schema=HBNX ;
 
 ------------------------------------------------

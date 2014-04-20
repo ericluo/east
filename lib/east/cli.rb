@@ -38,16 +38,13 @@ module East
       end
     end
 
-    desc "create DATABASE DIR", "在指定路径创建数据库"
-    def create(dbname, dir)
-      # add user for database
-      run "sudo useradd -g db2iadm1 #{dbname}"
-      # create database 
-      run "db2 create database #{dbname} automatic storage yes on #{dir} using codeset gbk territory cn"
-      # create database eastst
-      run "db2 -tvf sql/create_#{dbname}.sql > log/create_#{dbname}.log"
-    end
-
+    # before setup database, following next steps as db2inst1 user.
+    # add user for database
+    # sudo useradd -g db2iadm1 eastst
+    # create database 
+    # db2 create database eastst automatic storage yes on DIR using codeset gbk territory cn
+    # create database eastst
+    # db2 -tvf sql/create_eastst.sql > log/create_eastst.log
     desc "setup", "初始化数据库"
     option :schemas, type: :string, default: :all
     def setup

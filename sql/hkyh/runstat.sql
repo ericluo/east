@@ -1,4 +1,4 @@
-CONNECT TO EASTST user db2inst1 using db2inst1 ;
+CONNECT TO EASTST user db2inst1 using wanyue0916 ;
 
 runstats on table "HKYH"."T_GX_GWXX" and indexes all;
 runstats on table "HKYH"."T_GX_GYB" and indexes all;
