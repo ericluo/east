@@ -1,9 +1,9 @@
 require 'open3'
 
+require 'thor'
+
 module East
   module DBProxy
-    DB2 = "/home/db2inst1/sqllib/bin/db2"
-    
     def psql(opts, input)
       IO.popen("psql #{opts}", 'r+') do |io|
         io.puts input
@@ -12,9 +12,12 @@ module East
       end
     end
 
-    def db2(opts, stream = '')
-      Open3.popen3("#{DB2} #{opts}") do |i, o, e, t|
-        block_given? ? yield(i) : i.puts(stream)
+    # stream: sql script to execute, 'connect to dbname' will be added automatically.
+    # block:  string returned from block will be added to stream
+    def db2(opts, stream = nil, &block)
+      Open3.popen3("#{DB2_CMD} #{opts}") do |i, o, e, t|
+        stream ||= block_given? ? block.call : ''
+        stream.each_line.to_a.unshift(conn_stmt).map{|stmt| i.puts stmt}
         i.close
 
         o.readlines

@@ -13,6 +13,7 @@ module East
 
     check_unknown_options!
     stop_on_unknown_option!
+    add_runtime_options!
     # default_task :exec
 
     desc "generate", "生成数据库建表脚本"
@@ -100,6 +101,15 @@ module East
         run "db2 -tvf sql/truncate.sql"
       end
     end
+
+    no_commands {
+      def db2_batch(script, stream = nil, &block)
+        conn_stmt = "db2 connect to eastst user db2inst1 using wanyue0916;"
+        create_file(script, stream, block) 
+        prepend_file(script, conn_stmt)
+        # `"PATH=$PATH:~db2inst1/sqllib/bin db2 -xtvf #{script}`
+      end
+    }
 
     private
     # used by thor to find the template

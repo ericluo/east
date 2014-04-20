@@ -4,6 +4,7 @@ require 'csv'
 require 'resque'
 
 require 'east/bank'
+require 'east/job'
 
 module East
     
