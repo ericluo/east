@@ -12,7 +12,7 @@ module East
     def run
       gen_date = (Time.now - limit.to_i.days).strftime('%Y-%m-%d')
 
-      select_script, drop_script = "sql/select_tmp_tables_1.sql", "sql/drop_tmp_tables_1.sql"
+      select_script, drop_script = "sql/select_tmp_tables.sql", "sql/drop_tmp_tables.sql"
       tmp_tables = thor.db2_batch(select_script) do
         %Q{select tabschema, tabname from syscat.tables where tabname like 'CBRC%' and last_regen_time < to_date('#{gen_date}', 'yyyy-mm-dd');}
       end

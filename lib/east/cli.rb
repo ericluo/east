@@ -107,7 +107,7 @@ module East
         conn_stmt = "db2 connect to eastst user db2inst1 using wanyue0916;"
         create_file(script, stream, block) 
         prepend_file(script, conn_stmt)
-        # `"PATH=$PATH:~db2inst1/sqllib/bin db2 -xtvf #{script}`
+        `"PATH=$PATH:~db2inst1/sqllib/bin db2 -xtvf #{script}`
       end
     }
 
