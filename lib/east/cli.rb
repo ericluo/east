@@ -17,7 +17,7 @@ module East
     # default_task :exec
 
     desc "generate", "生成数据库建表脚本"
-    option :schemas, type: :string, required: true, default: :all
+    option :schemas,  type: :array,  default: :all
     option :username, type: :string, default: "db2inst1"
     option :password, type: :string, default: "wanyue0916"
     def generate
@@ -25,7 +25,7 @@ module East
       @password = options[:password]
       ["create_eastst.sql.erb"].each do |file|
         dest = File.basename(file).sub(/\.erb$/, '')
-        template file, East.root.join("sql", dest)
+        template file, East::ROOT_DIR.join("sql", dest)
       end
       
       schemas(options).each do |schema|
@@ -33,7 +33,7 @@ module East
 
         ["create_table.sql.erb", "grant.sql.erb", "runstat.sql.erb"].each do |file|
           dest = File.basename(file).sub(/\.erb$/, '')
-          template file, East.root.join("sql", @schema.downcase, dest)
+          template file, East::ROOT_DIR.join("sql", @schema.downcase, dest)
         end
       end
     end
@@ -114,14 +114,15 @@ module East
     private
     # used by thor to find the template
     def self.source_root
-      East.root.join("template")
+      East::ROOT_DIR.join("template")
     end
 
     def schemas(options)
-      if options[:schemas] == :all
-        East::BANKS.collect{|_,v| v["schema"]}
+      schemas = options[:schemas]
+      if schemas == :all
+        Bank.instances.values.map(&:schema)
       else
-        options[:schemas].split(',') || []
+        schemas
       end
     end
 
