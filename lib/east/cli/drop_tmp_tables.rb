@@ -16,6 +16,8 @@ module East
       tmp_tables = thor.db2_batch(select_script) do
         %Q{select tabschema, tabname from syscat.tables where tabname like 'CBRC%' and last_regen_time < to_date('#{gen_date}', 'yyyy-mm-dd');}
       end
+
+      puts "tables " + tmp_tables
       
       thor.db2_batch(drop_script) do
         tmp_tables.map do |line|

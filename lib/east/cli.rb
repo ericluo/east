@@ -19,7 +19,7 @@ module East
     desc "generate", "生成数据库建表脚本"
     option :schemas, type: :string, required: true, default: :all
     option :username, type: :string, default: "db2inst1"
-    option :password, type: :string, default: "db2inst1"
+    option :password, type: :string, default: "wanyue0916"
     def generate
       @username = options[:username]
       @password = options[:password]
@@ -104,10 +104,10 @@ module East
 
     no_commands {
       def db2_batch(script, stream = nil, &block)
-        conn_stmt = "db2 connect to eastst user db2inst1 using wanyue0916;"
+        conn_stmt = "connect to eastst user db2inst1 using wanyue0916;"
         create_file(script, stream, block) 
         prepend_file(script, conn_stmt)
-        `"PATH=$PATH:~db2inst1/sqllib/bin db2 -xtvf #{script}`
+        `PATH=$PATH:~db2inst1/sqllib/bin db2 -xtvf #{script}`
       end
     }
 

@@ -1,1 +1,1 @@
-db2 connect to eastst user db2inst1 using wanyue0916;
+connect to eastst user db2inst1 using wanyue0916;
