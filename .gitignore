@@ -12,7 +12,7 @@ test/tmp
 test/version_tmp
 tmp
 log/
-sql/
+/sql/
 
 # YARD artifacts
 .yardoc

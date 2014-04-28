@@ -43,9 +43,9 @@ module East
       # add user for database
       run "sudo useradd -g db2iadm1 #{dbname}"
       # create database 
-      run "db2 create database #{dbname} automatic storage yes on #{dir} using codeset gbk territory cn"
+      run "PATH=$PATH:~db2inst1/sqllib/bin db2 create database #{dbname} automatic storage yes on #{dir} using codeset gbk territory cn"
       # create database eastst
-      run "db2 -tvf sql/create_#{dbname}.sql > log/create_#{dbname}.log"
+      run "PATH=$PATH:~db2inst1/sqllib/bin db2 -tvf sql/create_#{dbname}.sql > log/create_#{dbname}.log"
     end
 
     desc "setup", "初始化数据库"
