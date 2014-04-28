@@ -1,1 +1,0 @@
-connect to eastst user db2inst1 using wanyue0916;
