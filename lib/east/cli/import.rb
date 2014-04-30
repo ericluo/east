@@ -1,6 +1,6 @@
 module East
   class CLI::Import
-    attr_reader :options, dir
+    attr_reader :options, :dir
 
     def initialize(options, dir)
       @options = options

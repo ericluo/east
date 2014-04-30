@@ -71,7 +71,7 @@ module East
     desc "import DIR", "导入指定目录的数据文件"
     option :sync, :aliases => ["-s"], :type => :boolean, :default => false
     option :glob, :aliases => ['-g'], :type => :string,  :default => '*.txt'
-    option :mode, :aliases => ["-m"], :type => :boolean, :default => true
+    option :mode, :aliases => ["-m"], :type => :string,  :default => 'I'
     def import(dir)
       require 'east/cli/import'
       Import.new(options, dir).run

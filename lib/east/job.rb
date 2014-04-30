@@ -9,8 +9,8 @@ module East
       extend Resque::Plugins::History
 
       def self.perform(file, mode)
-        table = find_by(file)
-        table.load(file, mode: mode)
+        table = Table.find_by(file)
+        table.load_file(file, sync: true, mode: mode)
       end
     end
   end

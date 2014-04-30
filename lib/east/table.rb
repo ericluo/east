@@ -42,7 +42,8 @@ module East
         
       def load_files(dir, glob: '*.txt', sync: false, mode: nil)
         fs, mfs = check(dir, glob: glob)
-        fs.each {|file| find_by(file).load_file(file, sync, mode)}
+        fs.each {|file| find_by(file).
+                  load_file(file, sync: sync, mode: mode)}
         {success: fs, fail: mfs}
       end
     end
@@ -59,10 +60,11 @@ module East
     end
 
     # TODO load data into database 
-    def load_file(file, sync, mode)
+    def load_file(file, sync: false, mode: 'I')
       mode ||= Table[iname].mode
       action = ("R" == mode) ? "replace" : "insert"
       if sync
+        system "db2 connect to eastst user db2inst1 using db2inst1"
         cmd = "db2 load from #{file} of del #{action} into #{schema}.#{ename}"
         system(cmd)
       else

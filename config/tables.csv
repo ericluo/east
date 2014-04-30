@@ -35,7 +35,7 @@
 授信交易对手信息,408,委托贷款,T_SJD_WTDK,WTDK,R
 授信交易对手信息,409,个人信贷业务借据,T_SJD_GXYJJ,GRXDYWJJ,R
 授信交易对手信息,410,对公信贷业务借据,T_SJD_DXYJJ,DGXDYWJJ,R
-授信交易对手信息,411,信贷业务担保合同,T_SJD_XYDHT,XDYWDBHT ,R
+授信交易对手信息,411,信贷业务担保合同,T_SJD_XYDHT,XDYWDBHT,R
 授信交易对手信息,412,担保关系,T_SJD_XYDGX,DBGX,R
 授信交易对手信息,413,信贷业务质或抵押物,T_SJD_XYZDYW,XDYWZHDYW,R
 卡片信息类数据结构,501,借记卡信息,T_KP_JJKXX,JJKXX,R
@@ -46,7 +46,7 @@
 信贷管理信息类数据结构,602,贷款核销,T_XG_DKHX,DKHX,R
 信贷管理信息类数据结构,603,贷款展期,T_XG_DKZQ,DKZQ,R
 信贷管理信息类数据结构,604,信贷资产转让,T_XG_XDZCZR,XDZCZR,R
-信贷管理信息类数据结构,605,资产转让关系表,T_XG_ZZRGX,WZBCDZTRJGLXMMDD,R
+信贷管理信息类数据结构,605,资产转让关系表,T_XG_ZZRGX,ZCZRGXB,R
 信贷管理信息类数据结构,606,贷款五级形态变动,T_XG_DKWXB,DKWJXTBD,R
 信贷管理信息类数据结构,607,贷后检查表,T_XG_DHJCB,DHJCB,R
 交易流水信息,701,交易流水,T_JL_JYLS,JYLS,I
