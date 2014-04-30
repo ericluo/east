@@ -2,16 +2,15 @@
 
 module East
   module DBRunnable
-    def db_cmd(db_name, schema, user: nil, passwd: nil)
+    def db_cmd(cmd = nil, db: 'eastst', user: 'db2inst1', passwd: 'db2inst1')
       connect_sql = if user
-                      "db2 connect to #{db_name} user #{user} using #{passed}"
+                      "db2 connect to #{db} user #{user} using #{passwd}"
                     else
-                      "db2 connect to #{db_name}"
+                      "db2 connect to #{db}"
                     end
       system(connect_sql)
-      system("db2 set current schema=#{schema}")
-
-      yield if block_given?
+      cmd ||= yield
+      system(cmds)
     end
 
     def db_pipe_cmd(db_name, schema, user: nil, passwd: nil, &cmds)

@@ -10,7 +10,7 @@ module East
 
       def self.perform(file, mode)
         table = Table.find_by(file)
-        table.load_file(file, sync: true, mode: mode)
+        table.load(file, mode)
       end
     end
   end

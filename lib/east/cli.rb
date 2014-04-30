@@ -62,7 +62,6 @@ module East
     end
 
     desc "check DIR", "检查数据文件的文件名格式"
-    option :glob, aliases: ['-g'], type: :string, default: '*.txt'
     def check(dir)
       require 'east/cli/check'
       Check.new(options, dir).run
@@ -70,8 +69,7 @@ module East
 
     desc "import DIR", "导入指定目录的数据文件"
     option :sync, :aliases => ["-s"], :type => :boolean, :default => false
-    option :glob, :aliases => ['-g'], :type => :string,  :default => '*.txt'
-    option :mode, :aliases => ["-m"], :type => :string,  :default => 'I'
+    option :mode, :aliases => ["-m"], :type => :string,  :default => 'I', :enum => ['I', 'R']
     def import(dir)
       require 'east/cli/import'
       Import.new(options, dir).run

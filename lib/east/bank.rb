@@ -36,17 +36,5 @@ module East
       @tables = CSV.read(TABLE_CFG, headers: true).map {|t| Table.new(*t.fields, schema)}
     end
 
-    def async_load_data(dir, gather_date, append = false)
-      tables.each do |table|
-        fname = table.fname(dir, gather_date)
-        if File.exists(fname)
-          command = table.to_load_command(fname, append)
-          Resque.enqueue(LoadDataTask, name, table.code, command)
-        else
-          $stdout.puts "File #{data_file.to_s} not exist"
-        end
-      end
-    end
-
   end
 end

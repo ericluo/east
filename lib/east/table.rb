@@ -9,8 +9,10 @@ require 'east/job'
 module East
     
   class Table
-    attr_accessor :category, :code, :cname, :ename, :iname, :mode
+    attr_accessor :category, :code, :cname, :ename, :iname, :default_mode
     attr_accessor :schema
+
+    include DBRunnable
 
     class << self
 
@@ -31,45 +33,49 @@ module East
       # check criteria
       #  license
       #  iname, interface file name 
-      def check(dir, glob: '*.txt')
+      # return:
+      #   fs, files with correct format
+      #   mfs, files with malformat
+      def check(dir)
         path  = Pathname.new(dir)
-        files = path.file? ? [path] : Pathname.glob(path.join(glob)).entries
+        files = path.file? ? [path] : Pathname.glob(path.join('*.txt')).entries
         mfs   = files.reject {|f| find_by(f)}
         fs    = files - mfs
 
         [fs, mfs]
       end
         
-      def load_files(dir, glob: '*.txt', sync: false, mode: nil)
-        fs, mfs = check(dir, glob: glob)
-        fs.each {|file| find_by(file).
-                  load_file(file, sync: sync, mode: mode)}
+      def load_files(dir, sync: false, mode: nil)
+        fs, mfs = check(dir)
+        fs.each {|file| find_by(file).load_file(file, sync: sync, mode: mode)}
         {success: fs, fail: mfs}
       end
     end
 
-    def initialize(category, code, cname, ename, iname, mode, schema)
-      @category = category
-      @code     = code
-      @cname    = cname
-      @ename    = ename
-      @iname    = iname
-      @mode     = mode
+    def initialize(category, code, cname, ename, iname, default_mode, schema)
+      @category     = category
+      @code         = code
+      @cname        = cname
+      @ename        = ename
+      @iname        = iname
+      @default_mode = default_mode
 
-      @schema   = schema
+      @schema       = schema
     end
 
     # TODO load data into database 
-    def load_file(file, sync: false, mode: 'I')
-      mode ||= Table[iname].mode
-      action = ("R" == mode) ? "replace" : "insert"
+    def load_file(file, sync: false, mode: nil)
       if sync
-        system "db2 connect to eastst user db2inst1 using db2inst1"
-        cmd = "db2 load from #{file} of del #{action} into #{schema}.#{ename}"
-        system(cmd)
+        load(file, mode)
       else
         Resque.enqueue(Job::DataLoader, file, mode)
       end
+    end
+    
+    def load(file, mode)
+      mode ||= Table[iname].default_mode
+      action = ("R" == mode) ? "replace" : "insert"
+      db_cmd "db2 load from #{file} of del #{action} into #{schema}.#{ename}"
     end
     
   end
