@@ -41,7 +41,7 @@ module East
 
     it "generate sql script for the given file" do
       table = Table.find_by(@file)
-      table.load_file(@file, false, nil)
+      table.load_file(@file)
       # table.load(@file, mode: "I").must_equal <<-SQL.chomp.strip
       #   db2 load from #{@file} of del insert into HKYH.T_GX_JGXX
       # SQL

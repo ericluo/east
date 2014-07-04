@@ -5,6 +5,7 @@ require 'resque'
 
 require 'east/bank'
 require 'east/job'
+require 'east/db_action'
 
 module East
     
